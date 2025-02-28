@@ -13,6 +13,8 @@ import * as path from 'path';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { documentMapping } from 'src/utils/document-mapping';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +33,7 @@ export class AuthService {
       throw new UnauthorizedException('Your account is locked.');
     }
     if (!user) throw new UnauthorizedException('Invalid credentials');
-
+    
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
@@ -44,7 +46,7 @@ export class AuthService {
       expiresIn: this.configService.get<string>('JWT_EXPIRATION'),
     });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
-
+    
     return {
       accessToken,
       refreshToken,
@@ -53,6 +55,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        role: user.role,
       },
     };
   }
@@ -105,6 +108,15 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired token');
     }
   }
-  
-  
+
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const user = this.userRepository.create(createUserDto);
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    user.password = hashedPassword;
+    user.previousPassword = hashedPassword;
+
+    const createdUser = await this.userRepository.save(user);
+    return documentMapping(createdUser, User);
+  }
 }

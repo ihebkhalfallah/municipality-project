@@ -10,40 +10,33 @@ import {
   NotFoundException,
   UseGuards,
   Request,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from 'src/types/pagination.type';
-import { FilterUserDto } from 'src/types/filter.type';
+import {  FindUserDto } from 'src/users/dto/filteruser.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { USER_ROLE } from './role.enum';
 import { CreateAdminDto } from './dto/create-admin.dto';
+import { RolesGuard } from 'src/auth/role.guard';
+import { Roles } from 'src/auth/role.decorator';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @UseGuards(JwtAuthGuard)
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-  @UseGuards(JwtAuthGuard)
+  @Roles(USER_ROLE.SUPER_ADMIN)
   @Post('create-admin')
-  async createAdmin(
-    @Request() req,
-    @Body() createAdminDto: CreateAdminDto
-  ) {
+  async createAdmin(@Request() req, @Body() createAdminDto: CreateAdminDto) {
     return this.userService.createAdmin(req.user, createAdminDto);
   }
 
   @Get()
-  findAll(
-    @Query() paginationDto: PaginationDto,
-    @Query() filterUserDto: FilterUserDto,
-  ) {
-    return this.userService.findAll(paginationDto, filterUserDto);
+  findAll(@Query(new ValidationPipe({ transform: true })) findUserDto: FindUserDto) {
+    return this.userService.findAll(findUserDto);
   }
 
   @Get(':id')

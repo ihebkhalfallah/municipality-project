@@ -1,0 +1,12 @@
+export enum EVENT_TYPE {
+  EVENT = 'EVENT',
+  NEWS = 'NEWS',
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+}
+
+export enum EVENT_STATUS {
+    PENDING = 'PENDING',
+    ACCEPTED = 'ACCEPTED',
+    REJECTED = 'REJECTED',
+  }
+  

@@ -18,8 +18,11 @@ async function bootstrap() {
   );
   app.useGlobalFilters(
     new QueryFailedExceptionFilter(),
-    // new HttpExceptionFilter(),
+    new HttpExceptionFilter(),
   );
+  // app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  //   prefix: '/uploads/',
+  // });
 
   app.useGlobalInterceptors(new TransformInterceptor());
   await app.listen(process.env.PORT ?? 3000);

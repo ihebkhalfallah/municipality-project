@@ -1,6 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
-import { Exclude, Transform } from 'class-transformer';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  OneToMany,
+} from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { USER_ROLE } from './role.enum';
+import { Event } from 'src/event/event.entity';
+import { Demande } from 'src/demande/demande.entity';
+import { Authorization } from 'src/authorization/authorization.entity';
+import { Comment } from 'src/comment/comment.entity';
 
 @Entity()
 export class User {
@@ -51,6 +61,24 @@ export class User {
   @Column({ type: 'varchar' })
   profile_photo: string;
 
-  @Column({type:'boolean', default:false})
+  @Column({ type: 'boolean', default: false })
   locked: boolean;
+
+  @OneToMany(() => Event, (event) => event.createdBy)
+  events: Event[];
+
+  @OneToMany(() => Demande, (demand) => demand.createdBy)
+  demandes: Demande[];
+
+  @OneToMany(() => Authorization, (authorization) => authorization.createdBy)
+  authorizations: Authorization[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: Date;
 }

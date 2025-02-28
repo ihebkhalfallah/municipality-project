@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تغيير حالة الحدث</title>
+    <style>
+      body {
+        direction: rtl;
+        text-align: right;
+        font-family: Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>تغيير حالة الحدث</h1>
+    <p>مرحبًا {{name}},</p>
+    <p>
+      تم تحديث حالة الحدث الخاص بك "{{eventName}}" إلى:
+      <strong>{{status}}</strong>.
+    </p>
+    <p>تاريخ الحدث: {{eventDate}}</p>
+    <p>موقع الحدث: {{eventLocation}}</p>
+    <p>للمزيد من التفاصيل، يرجى زيارة الموقع.</p>
+    <a href="http://localhost:3000/events/{{eventId}}">عرض الحدث</a>
+  </body>
+</html>

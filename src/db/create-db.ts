@@ -21,9 +21,9 @@ async function createDatabaseIfNotExists() {
     );
     if (rows.length === 0) {
       await connection.execute(`CREATE DATABASE ${databaseName}`);
-      // console.log(`Database '${databaseName}' created successfully.`);
+      console.log(`Database '${databaseName}' created successfully.`);
     } else {
-      // console.log(`Database '${databaseName}' already exists.`);
+      console.log(`Database '${databaseName}' already exists.`);
     }
   } catch (error) {
     console.error('Error creating database:', error);

@@ -7,10 +7,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { PaginationDto } from 'src/types/pagination.type';
-import { FilterUserDto } from 'src/types/filter.type';
+import { FindUserDto } from 'src/users/dto/filteruser.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { documentMapping } from 'src/utils/document-mapping';
@@ -28,15 +27,12 @@ export class UserService {
     const user = this.userRepository.create(createUserDto);
     const hashedPassword = await bcrypt.hash(user.password, 10);
     user.password = hashedPassword;
-
+    user.previousPassword = hashedPassword;
     const createdUser = await this.userRepository.save(user);
     return documentMapping(createdUser, User);
   }
 
-  async findAll(
-    paginationDto: PaginationDto,
-    filterUserDto: FilterUserDto,
-  ): Promise<{
+  async findAll(findUserDto: FindUserDto): Promise<{
     data: User[];
     total: number;
     page: number;
@@ -47,8 +43,6 @@ export class UserService {
       limit = 10,
       sortBy = 'id',
       sortOrder = 'ASC',
-    } = paginationDto;
-    const {
       firstName,
       lastName,
       email,
@@ -57,18 +51,26 @@ export class UserService {
       cin,
       idAssociation,
       job,
-    } = filterUserDto;
+    } = findUserDto;
 
     const query = this.userRepository.createQueryBuilder('user');
 
-    if (firstName) query.andWhere({ firstName: Like(`%${firstName}%`) });
-    if (lastName) query.andWhere({ lastName: Like(`%${lastName}%`) });
-    if (email) query.andWhere({ email: Like(`%${email}%`) });
-    if (role) query.andWhere({ role });
-    if (birthDate) query.andWhere({ birthDate });
-    if (cin) query.andWhere({ cin });
-    if (idAssociation) query.andWhere({ idAssociation });
-    if (job) query.andWhere({ job: Like(`%${job}%`) });
+    if (firstName)
+      query.andWhere('user.firstName LIKE :firstName', {
+        firstName: `%${firstName}%`,
+      });
+    if (lastName)
+      query.andWhere('user.lastName LIKE :lastName', {
+        lastName: `%${lastName}%`,
+      });
+    if (email)
+      query.andWhere('user.email LIKE :email', { email: `%${email}%` });
+    if (role) query.andWhere('user.role = :role', { role });
+    if (birthDate) query.andWhere('user.birthDate = :birthDate', { birthDate });
+    if (cin) query.andWhere('user.cin = :cin', { cin });
+    if (idAssociation)
+      query.andWhere('user.idAssociation = :idAssociation', { idAssociation });
+    if (job) query.andWhere('user.job LIKE :job', { job: `%${job}%` });
 
     query.orderBy(`user.${sortBy}`, sortOrder);
 
@@ -77,13 +79,11 @@ export class UserService {
       .take(limit)
       .getManyAndCount();
 
-    const totalPages = Math.ceil(total / limit);
-
     return {
-      data: documentMapping(data, User),
+      data,
       total,
       page: +page,
-      totalPages,
+      totalPages: Math.ceil(total / limit),
     };
   }
 

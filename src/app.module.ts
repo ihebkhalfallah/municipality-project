@@ -7,6 +7,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MailerService } from './mailer/mailer.service';
 import { MailerModule } from './mailer/mailer.module';
+import { EventModule } from './event/event.module';
+import { DemandeModule } from './demande/demande.module';
+import { AuthorizationModule } from './authorization/authorization.module';
+import { CommentModule } from './comment/comment.module';
+import { DocumentModule } from './documents/document.module';
 
 @Module({
   imports: [
@@ -20,14 +25,19 @@ import { MailerModule } from './mailer/mailer.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'], // Auto-load entities
-        synchronize: true,
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        // synchronize: true,
       }),
       inject: [ConfigService],
     }),
     UserModule,
     AuthModule,
     MailerModule,
+    EventModule,
+    DemandeModule,
+    AuthorizationModule,
+    CommentModule,
+    DocumentModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailerService],
