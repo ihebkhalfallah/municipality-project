@@ -94,6 +94,12 @@ export class EventService {
     }
     const updatedEvent = await this.eventRepository.save(event);
 
+    if (updatedEvent.createdBy) {
+      delete (updatedEvent.createdBy as { password?: string }).password;
+      delete (updatedEvent.createdBy as { previousPassword?: string })
+        .previousPassword;
+    }
+
     return documentMapping(updatedEvent, Event);
   }
 
@@ -121,13 +127,20 @@ export class EventService {
   async findOne(eventId: number): Promise<Event> {
     const event = await this.eventRepository.findOne({
       where: { id: eventId },
+      relations: ['createdBy'],
     });
 
     if (!event) {
       throw new NotFoundException('Event not found');
     }
 
-    return event;
+    if (event.createdBy) {
+      delete (event.createdBy as { password?: string }).password;
+      delete (event.createdBy as { previousPassword?: string })
+        .previousPassword;
+    }
+
+    return documentMapping(event, Event);
   }
 
   async findAll(findEventDto: FindEventDto): Promise<{
@@ -147,8 +160,9 @@ export class EventService {
       createdByUserId,
     } = findEventDto;
 
-    const query = this.eventRepository.createQueryBuilder('event');
-
+    const query = this.eventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.createdBy', 'user');
     if (name) query.andWhere('event.name LIKE :name', { name: `%${name}%` });
     if (status) query.andWhere('event.status = :status', { status });
     if (type) query.andWhere('event.type = :type', { type });
@@ -165,6 +179,14 @@ export class EventService {
       .getManyAndCount();
 
     const totalPages = Math.ceil(total / limit);
+
+    data.forEach((event) => {
+      if (event.createdBy) {
+        delete (event.createdBy as { password?: string }).password;
+        delete (event.createdBy as { previousPassword?: string })
+          .previousPassword;
+      }
+    });
 
     return { data, total, page, totalPages };
   }

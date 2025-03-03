@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { Roles } from 'src/auth/role.decorator';
 import { USER_ROLE } from 'src/users/role.enum';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FindEventDto } from './dto/filter-event.dto';
+import { AuthenticatedRequest } from 'src/types/user-payload.interface';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('events')
@@ -30,11 +32,12 @@ export class EventController {
     USER_ROLE.PERMISSION_ADMIN,
     USER_ROLE.SUPER_ADMIN,
   )
-  @Post(':userId')
+  @Post()
   create(
     @Body() createEventDto: CreateEventDto,
-    @Param('userId') userId: number,
+    @Req() req: AuthenticatedRequest,
   ) {
+    const userId = req.user.userId;
     return this.eventService.createEvent(userId, createEventDto);
   }
 

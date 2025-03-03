@@ -1,4 +1,10 @@
-import { IsEnum, IsISO8601, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsISO8601,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { EVENT_TYPE } from '../event.enum';
 import { Optional } from '@nestjs/common';
 
@@ -7,7 +13,7 @@ export class CreateEventDto {
   @IsString()
   name: string;
 
-  @Optional()
+  @IsOptional()
   location: string;
 
   @IsNotEmpty()

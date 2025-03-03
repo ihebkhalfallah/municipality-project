@@ -89,6 +89,14 @@ export class DemandeService {
 
     const totalPages = Math.ceil(total / limit);
 
+    data.forEach((demande) => {
+      if (demande.createdBy) {
+        delete (demande.createdBy as { password?: string }).password;
+        delete (demande.createdBy as { previousPassword?: string })
+          .previousPassword;
+      }
+    });
+
     return { data, total, page, totalPages };
   }
 
@@ -110,6 +118,11 @@ export class DemandeService {
     // send email if demande status is changed
 
     const updatedDemande = await this.demandeRepository.save(demande);
+    if (updatedDemande.createdBy) {
+      delete (updatedDemande.createdBy as { password?: string }).password;
+      delete (updatedDemande.createdBy as { previousPassword?: string })
+        .previousPassword;
+    }
     return documentMapping(updatedDemande, Demande);
   }
 
@@ -142,6 +155,12 @@ export class DemandeService {
 
     if (!demand) {
       throw new NotFoundException('Demande not found');
+    }
+
+    if (demand.createdBy) {
+      delete (demand.createdBy as { password?: string }).password;
+      delete (demand.createdBy as { previousPassword?: string })
+        .previousPassword;
     }
 
     return documentMapping(demand, Demande);
