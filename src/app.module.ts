@@ -12,6 +12,8 @@ import { DemandeModule } from './demande/demande.module';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { CommentModule } from './comment/comment.module';
 import { DocumentModule } from './documents/document.module';
+import { UserRoleSeed } from './seeds/user-role.seed';
+import { User } from './users/user.entity';
 
 @Module({
   imports: [
@@ -26,10 +28,11 @@ import { DocumentModule } from './documents/document.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        // synchronize: true,
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([User]),
     UserModule,
     AuthModule,
     MailerModule,
@@ -40,6 +43,6 @@ import { DocumentModule } from './documents/document.module';
     DocumentModule,
   ],
   controllers: [AppController],
-  providers: [AppService, MailerService],
+  providers: [AppService, MailerService, UserRoleSeed],
 })
 export class AppModule {}

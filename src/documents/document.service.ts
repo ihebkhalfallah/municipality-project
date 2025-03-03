@@ -11,7 +11,7 @@ import { Authorization } from 'src/authorization/authorization.entity';
 import { Comment } from 'src/comment/comment.entity';
 import { Express } from 'express';
 import { join } from 'path';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { Document } from './documents.entity';
 
 @Injectable()
@@ -30,8 +30,13 @@ export class DocumentService {
   ) {}
 
   // Helper function to save the file to the server
-  private saveFile(file: Express.Multer.File): string {
-    const uploadDir = join(__dirname, '..', 'uploads');
+  private saveFile(file: Express.Multer.File): {
+    filePath: string;
+    fileName: string;
+  } {
+    // Define the upload directory at the root level
+    const uploadDir = join(__dirname, '..', '..', 'uploads');
+    console.log(uploadDir);
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, { recursive: true });
     }
@@ -41,82 +46,178 @@ export class DocumentService {
 
     writeFileSync(filePath, file.buffer);
 
-    return filePath;
+    return {
+      filePath,
+      fileName: file.originalname,
+    };
   }
 
-  async uploadDocument(
-    file: Express.Multer.File,
+  async uploadDocuments(
+    files: Express.Multer.File[],
     entityType: string,
     entityId: number,
-  ): Promise<Document> {
-    const filePath = this.saveFile(file);
-
-    let entity: Event | Demande | Authorization | Comment | null;
-
-    switch (entityType) {
-      case 'event':
-        entity = await this.eventRepository.findOneBy({ id: entityId });
-        if (!entity) {
-          throw new NotFoundException(`Event with ID ${entityId} not found`);
-        }
-        break;
-      case 'demande':
-        entity = await this.demandeRepository.findOneBy({ id: entityId });
-        if (!entity) {
-          throw new NotFoundException(`Demande with ID ${entityId} not found`);
-        }
-        break;
-      case 'authorization':
-        entity = await this.authorizationRepository.findOneBy({ id: entityId });
-        if (!entity) {
-          throw new NotFoundException(
-            `Authorization with ID ${entityId} not found`,
-          );
-        }
-        break;
-      case 'comment':
-        entity = await this.commentRepository.findOneBy({ id: entityId });
-        if (!entity) {
-          throw new NotFoundException(`Comment with ID ${entityId} not found`);
-        }
-        break;
-      default:
-        throw new BadRequestException('Invalid entity type');
+  ): Promise<Document[]> {
+    if (
+      !['event', 'demande', 'authorization', 'comment'].includes(entityType)
+    ) {
+      throw new BadRequestException('Invalid entity type');
     }
 
-    // Create document with correct properties
-    const document = new Document();
-    document.filePath = filePath;
-    document.uploadDate = new Date();
+    const documents: Document[] = [];
 
-    // Only set the relevant entity and ID based on the entity type
-    switch (entityType) {
-      case 'event':
-        document.event = entity as Event;
-        document.eventId = entityId;
-        break;
-      case 'demande':
-        document.demande = entity as Demande;
-        document.demandeId = entityId;
-        break;
-      case 'authorization':
-        document.authorization = entity as Authorization;
-        document.authorizationId = entityId;
-        break;
-      case 'comment':
-        document.comment = entity as Comment;
-        document.commentId = entityId;
-        break;
+    for (const file of files) {
+      const { filePath, fileName } = this.saveFile(file);
+
+      let entity: Event | Demande | Authorization | Comment | null = null;
+
+      switch (entityType) {
+        case 'event':
+          entity = await this.eventRepository.findOneBy({ id: entityId });
+          if (!entity) {
+            throw new NotFoundException(`Event with ID ${entityId} not found`);
+          }
+          break;
+        case 'demande':
+          entity = await this.demandeRepository.findOneBy({ id: entityId });
+          if (!entity) {
+            throw new NotFoundException(
+              `Demande with ID ${entityId} not found`,
+            );
+          }
+          break;
+        case 'authorization':
+          entity = await this.authorizationRepository.findOneBy({
+            id: entityId,
+          });
+          if (!entity) {
+            throw new NotFoundException(
+              `Authorization with ID ${entityId} not found`,
+            );
+          }
+          break;
+        case 'comment':
+          entity = await this.commentRepository.findOneBy({ id: entityId });
+          if (!entity) {
+            throw new NotFoundException(
+              `Comment with ID ${entityId} not found`,
+            );
+          }
+          break;
+      }
+
+      // Create document with correct properties
+      const document = new Document();
+      document.filePath = filePath;
+      document.originalFileName = fileName;
+      document.fileSize = file.size;
+      document.mimeType = file.mimetype;
+      document.uploadDate = new Date();
+
+      // Only set the relevant entity and ID based on the entity type
+      switch (entityType) {
+        case 'event':
+          document.event = entity as Event;
+          document.eventId = entityId;
+          break;
+        case 'demande':
+          document.demande = entity as Demande;
+          document.demandeId = entityId;
+          break;
+        case 'authorization':
+          document.authorization = entity as Authorization;
+          document.authorizationId = entityId;
+          break;
+        case 'comment':
+          document.comment = entity as Comment;
+          document.commentId = entityId;
+          break;
+      }
+
+      documents.push(await this.documentRepository.save(document));
     }
 
-    return this.documentRepository.save(document);
+    return documents;
+  }
+
+  async getDocumentContent(
+    documentId: number,
+  ): Promise<{ buffer: Buffer; fileName: string; mimeType: string }> {
+    const document = await this.documentRepository.findOne({
+      where: { id: documentId },
+    });
+    console.log('doc', document);
+
+    if (!document) {
+      throw new NotFoundException(`Document with ID ${documentId} not found`);
+    }
+
+    const filePath = document.filePath;
+    console.log(`Attempting to read file at path: ${filePath}`);
+
+    if (!existsSync(filePath)) {
+      throw new NotFoundException(
+        `File for document ID ${documentId} not found at path: ${filePath}`,
+      );
+    }
+
+    try {
+      const buffer = readFileSync(filePath);
+      return {
+        buffer,
+        fileName: document.originalFileName,
+        mimeType: document.mimeType,
+      };
+    } catch (error) {
+      throw new NotFoundException(
+        `File for document ID ${documentId} cannot be read at path: ${filePath}`,
+      );
+    }
   }
 
   async getDocumentsByEntity(
     entityType: string,
     entityId: number,
   ): Promise<Document[]> {
-    const whereCondition = { [`${entityType}Id`]: entityId };
+    // Validate entity type first
+    if (
+      !['event', 'demande', 'authorization', 'comment'].includes(entityType)
+    ) {
+      throw new BadRequestException('Invalid entity type');
+    }
+
+    const whereCondition = {};
+    switch (entityType) {
+      case 'event':
+        whereCondition['eventId'] = entityId;
+        break;
+      case 'demande':
+        whereCondition['demandeId'] = entityId;
+        break;
+      case 'authorization':
+        whereCondition['authorizationId'] = entityId;
+        break;
+      case 'comment':
+        whereCondition['commentId'] = entityId;
+        break;
+    }
+
     return this.documentRepository.find({ where: whereCondition });
+  }
+
+  async getAllDocuments(): Promise<Document[]> {
+    return this.documentRepository.find();
+  }
+
+  async deleteDocument(documentId: number): Promise<{ success: boolean }> {
+    const document = await this.documentRepository.findOne({
+      where: { id: documentId },
+    });
+
+    if (!document) {
+      throw new NotFoundException(`Document with ID ${documentId} not found`);
+    }
+
+    await this.documentRepository.remove(document);
+    return { success: true };
   }
 }

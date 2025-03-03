@@ -68,17 +68,19 @@ export class DemandeService {
       createdByUserId,
     } = findDemandeDto;
 
-    const query = this.demandeRepository.createQueryBuilder('event');
+    const query = this.demandeRepository
+      .createQueryBuilder('demande')
+      .leftJoinAndSelect('demande.createdBy', 'user');
 
-    if (name) query.andWhere('event.name LIKE :name', { name: `%${name}%` });
-    if (status) query.andWhere('event.status = :status', { status });
-    if (type) query.andWhere('event.type = :type', { type });
+    if (name) query.andWhere('demande.name LIKE :name', { name: `%${name}%` });
+    if (status) query.andWhere('demande.status = :status', { status });
+    if (type) query.andWhere('demande.type = :type', { type });
     if (createdByUserId)
-      query.andWhere('event.createdByUserId = :createdByUserId', {
+      query.andWhere('demande.createdByUserId = :createdByUserId', {
         createdByUserId,
       });
 
-    query.orderBy(`event.${sortBy}`, sortOrder);
+    query.orderBy(`demande.${sortBy}`, sortOrder);
 
     const [data, total] = await query
       .skip((page - 1) * limit)
@@ -133,14 +135,15 @@ export class DemandeService {
   }
 
   async findOne(idDemande: number): Promise<Demande> {
-    const event = await this.demandeRepository.findOne({
+    const demand = await this.demandeRepository.findOne({
       where: { id: idDemande },
+      relations: ['createdBy'],
     });
 
-    if (!event) {
+    if (!demand) {
       throw new NotFoundException('Demande not found');
     }
 
-    return event;
+    return documentMapping(demand, Demande);
   }
 }

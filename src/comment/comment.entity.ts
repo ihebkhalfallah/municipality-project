@@ -1,7 +1,6 @@
 import { Authorization } from 'src/authorization/authorization.entity';
 import { Demande } from 'src/demande/demande.entity';
 import { Document } from 'src/documents/documents.entity';
-// import { Document } from 'src/documents/documents.entity';
 import { Event } from 'src/event/event.entity';
 import { User } from 'src/users/user.entity';
 import {

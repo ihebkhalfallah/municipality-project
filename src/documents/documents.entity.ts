@@ -19,6 +19,15 @@ export class Document {
   filePath: string;
 
   @Column()
+  originalFileName: string;
+
+  @Column({ nullable: true })
+  fileSize: number;
+
+  @Column({ nullable: true })
+  mimeType: string;
+
+  @Column()
   uploadDate: Date;
 
   @ManyToOne(() => Event, (event) => event.documents, { nullable: true })
