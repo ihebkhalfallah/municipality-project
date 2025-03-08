@@ -1,4 +1,4 @@
-import { IsOptional, IsInt, Min, IsString, IsEnum} from 'class-validator';
+import { IsOptional, IsInt, Min, IsString, IsEnum } from 'class-validator';
 import { AUTHORIZATION_STATUS } from '../authorization-status.enum';
 import { USER_ROLE } from 'src/users/role.enum';
 import { Type } from 'class-transformer';
@@ -28,7 +28,7 @@ export class FindAuthorizationDto {
   name?: string;
 
   @IsOptional()
-  @IsEnum(AUTHORIZATION_STATUS)
+  @IsString()
   status?: AUTHORIZATION_STATUS;
 
   @IsOptional()

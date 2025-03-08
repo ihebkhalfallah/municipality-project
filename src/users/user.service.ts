@@ -15,6 +15,9 @@ import * as bcrypt from 'bcrypt';
 import { documentMapping } from 'src/utils/document-mapping';
 import { USER_ROLE } from './role.enum';
 import { CreateAdminDto } from './dto/create-admin.dto';
+import { Express } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class UserService {
@@ -172,5 +175,21 @@ export class UserService {
     return {
       user: { id: newAdmin.id, email: newAdmin.email, role: newAdmin.role },
     };
+  }
+
+  async uploadProfilePhoto(
+    id: number,
+    file: Express.Multer.File,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const base64Data = file.buffer.toString('base64');
+    user.profile_photo = `data:${file.mimetype};base64,${base64Data}`;
+
+    const updatedUser = await this.userRepository.save(user);
+    return documentMapping(updatedUser, User);
   }
 }

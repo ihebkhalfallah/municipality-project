@@ -16,13 +16,13 @@ export class Authorization {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', charset: 'utf8', collation: 'utf8_general_ci' })
   description: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   location: string;
 
   @Column({ nullable: false })

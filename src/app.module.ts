@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,6 +14,8 @@ import { CommentModule } from './comment/comment.module';
 import { DocumentModule } from './documents/document.module';
 import { UserRoleSeed } from './seeds/user-role.seed';
 import { User } from './users/user.entity';
+import { MulterModule } from '@nestjs/platform-express';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -33,6 +35,9 @@ import { User } from './users/user.entity';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([User]),
+    MulterModule.register({
+      dest: './uploads',
+    }),
     UserModule,
     AuthModule,
     MailerModule,
@@ -45,4 +50,10 @@ import { User } from './users/user.entity';
   controllers: [AppController],
   providers: [AppService, MailerService, UserRoleSeed],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

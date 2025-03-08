@@ -145,14 +145,12 @@ export class DocumentService {
     const document = await this.documentRepository.findOne({
       where: { id: documentId },
     });
-    console.log('doc', document);
 
     if (!document) {
       throw new NotFoundException(`Document with ID ${documentId} not found`);
     }
 
     const filePath = document.filePath;
-    console.log(`Attempting to read file at path: ${filePath}`);
 
     if (!existsSync(filePath)) {
       throw new NotFoundException(

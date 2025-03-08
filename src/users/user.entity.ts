@@ -17,10 +17,10 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   firstName: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   lastName: string;
 
   @Column({ nullable: false, unique: true })
@@ -58,7 +58,7 @@ export class User {
   @Column({ type: 'varchar' })
   job: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'longtext', nullable: true })
   profile_photo: string;
 
   @Column({ type: 'boolean', default: false })

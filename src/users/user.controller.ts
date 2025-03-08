@@ -11,11 +11,14 @@ import {
   UseGuards,
   Request,
   ValidationPipe,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from 'src/types/pagination.type';
-import {  FindUserDto } from 'src/users/dto/filteruser.dto';
+import { FindUserDto } from 'src/users/dto/filteruser.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { USER_ROLE } from './role.enum';
@@ -35,7 +38,9 @@ export class UserController {
   }
 
   @Get()
-  findAll(@Query(new ValidationPipe({ transform: true })) findUserDto: FindUserDto) {
+  findAll(
+    @Query(new ValidationPipe({ transform: true })) findUserDto: FindUserDto,
+  ) {
     return this.userService.findAll(findUserDto);
   }
 
@@ -51,6 +56,15 @@ export class UserController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
+  }
+
+  @Patch(':id/upload-photo')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfilePhoto(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.userService.uploadProfilePhoto(+id, file);
   }
 
   @Delete(':id')

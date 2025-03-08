@@ -16,16 +16,16 @@ export class Event {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, charset: 'utf8', collation: 'utf8_general_ci' })
   location: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   description: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   date: Date;
 
   @Column({
