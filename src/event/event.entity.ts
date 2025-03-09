@@ -25,7 +25,7 @@ export class Event {
   @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
   description: string;
 
-  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ nullable: false })
   date: Date;
 
   @Column({

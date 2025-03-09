@@ -16,6 +16,11 @@ import { UserRoleSeed } from './seeds/user-role.seed';
 import { User } from './users/user.entity';
 import { MulterModule } from '@nestjs/platform-express';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { Authorization } from './authorization/authorization.entity';
+import { Demande } from './demande/demande.entity';
+import { Document } from './documents/documents.entity';
+import { Comment } from './comment/comment.entity';
+import { Event } from './event/event.entity';
 
 @Module({
   imports: [
@@ -29,7 +34,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [User, Event, Comment, Document, Demande, Authorization],
         synchronize: true,
       }),
       inject: [ConfigService],

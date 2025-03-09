@@ -5,9 +5,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './utils/transform.interceptor';
 import { QueryFailedExceptionFilter } from './utils/exception-filter';
 import { HttpExceptionFilter } from './utils/all-exceptions.filter';
-import { UserRoleSeed } from './seeds/user-role.seed';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
+import * as morgan from 'morgan';
+import { UserRoleSeed } from './seeds/user-role.seed';
 
 async function bootstrap() {
   await createDatabaseIfNotExists();
@@ -26,7 +27,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor());
 
   app.enableCors({
-    origin: 'http://localhost:3001', // change to env variable
+    origin: process.env.CORS_ORIGIN ?? 'http://localhost:3002',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -35,6 +36,10 @@ async function bootstrap() {
   app.useStaticAssets(path.join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });
+
+  app.use(
+    morgan(':method :url :status :res[content-length] - :response-time ms'),
+  );
 
   const userRoleSeed = app.get(UserRoleSeed);
   await userRoleSeed.seed();

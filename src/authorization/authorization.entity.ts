@@ -22,7 +22,7 @@ export class Authorization {
   @Column({ type: 'varchar', charset: 'utf8', collation: 'utf8_general_ci' })
   description: string;
 
-  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ nullable: false })
   location: string;
 
   @Column({ nullable: false })
