@@ -98,15 +98,42 @@ export class DemandeController {
     }
   }
 
-  @Roles(
-    USER_ROLE.ORGANIZATION,
-    USER_ROLE.CITIZEN,
-    USER_ROLE.SUPER_ADMIN,
-  )
+  @Roles(USER_ROLE.ORGANIZATION, USER_ROLE.CITIZEN, USER_ROLE.SUPER_ADMIN)
   @Delete(':id')
   async deleteDemande(@Param('id') id: number): Promise<void> {
     try {
       await this.demandeService.deleteDemande(id);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Roles(
+    USER_ROLE.ORGANIZATION,
+    USER_ROLE.CITIZEN,
+    USER_ROLE.CONTESTATION_ADMIN,
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.BUSINESS,
+  )
+  @Get('user/:userId/type/:type')
+  async findUserDemandesByType(
+    @Param('userId') userId: number,
+    @Param('type') type: string,
+    @Query() findDemandeDto: FindDemandeDto,
+  ): Promise<{
+    data: Demande[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    try {
+      const filterDto = {
+        ...findDemandeDto,
+        createdByUserId: userId,
+        type: type,
+      };
+
+      return await this.demandeService.findAll(filterDto);
     } catch (error) {
       throw new BadRequestException(error.message);
     }

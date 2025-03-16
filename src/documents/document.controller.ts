@@ -101,6 +101,32 @@ export class DocumentController {
       }
     }
   }
+
+  @Get('print/event/:eventId')
+  async printEventDocument(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Res() res: Response,
+  ) {
+    try {
+      const { buffer, fileName, mimeType } =
+        await this.documentService.getEventDocumentContent(eventId);
+
+      res.setHeader('Content-Type', mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+      res.send(buffer);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw error;
+      } else {
+        throw new BadRequestException(
+          'Error retrieving event document for printing',
+        );
+      }
+    }
+  }
+
   @Get(':entityType/:entityId')
   async getDocuments(
     @Param('entityType') entityType: string,

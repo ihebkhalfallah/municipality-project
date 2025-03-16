@@ -134,6 +134,7 @@ export class UserService {
       }
 
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      updateUserDto.previousPassword = user.password;
     }
 
     Object.assign(user, updateUserDto);
@@ -169,6 +170,7 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(createAdminDto.password, 10);
     createAdminDto.password = hashedPassword;
     const newAdmin = this.userRepository.create(createAdminDto);
+    newAdmin.previousPassword = hashedPassword;
 
     await this.userRepository.save(newAdmin);
 

@@ -218,4 +218,43 @@ export class DocumentService {
     await this.documentRepository.remove(document);
     return { success: true };
   }
+  async getEventDocumentContent(
+    eventId: number,
+  ): Promise<{ buffer: Buffer; fileName: string; mimeType: string }> {
+    // Find documents associated with this event
+    const documents = await this.documentRepository.find({
+      where: { eventId: eventId },
+    });
+
+    if (!documents || documents.length === 0) {
+      throw new NotFoundException(
+        `No documents found for event with ID ${eventId}`,
+      );
+    }
+    const document = documents.sort(
+      (a, b) =>
+        new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime(),
+    )[0];
+
+    const filePath = document.filePath;
+
+    if (!existsSync(filePath)) {
+      throw new NotFoundException(
+        `File for event ID ${eventId} not found at path: ${filePath}`,
+      );
+    }
+
+    try {
+      const buffer = readFileSync(filePath);
+      return {
+        buffer,
+        fileName: document.originalFileName,
+        mimeType: document.mimeType,
+      };
+    } catch (error) {
+      throw new NotFoundException(
+        `File for event ID ${eventId} cannot be read at path: ${filePath}`,
+      );
+    }
+  }
 }

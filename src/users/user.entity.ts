@@ -55,7 +55,7 @@ export class User {
   @Index({ unique: true, where: '"idAssociation" IS NOT NULL' })
   idAssociation: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   job: string;
 
   @Column({ type: 'longtext', nullable: true })

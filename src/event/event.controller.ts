@@ -31,6 +31,7 @@ export class EventController {
     USER_ROLE.ORGANIZATION,
     USER_ROLE.PERMISSION_ADMIN,
     USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.BUSINESS,
   )
   @Post()
   create(
@@ -45,6 +46,7 @@ export class EventController {
     USER_ROLE.ORGANIZATION,
     USER_ROLE.PERMISSION_ADMIN,
     USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.BUSINESS,
   )
   @Patch(':eventId')
   update(

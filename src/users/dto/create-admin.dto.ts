@@ -40,4 +40,7 @@ export class CreateAdminDto {
   @IsOptional()
   @IsString()
   profile_photo: string;
+
+  // @IsOptional()
+  // job: string;
 }
