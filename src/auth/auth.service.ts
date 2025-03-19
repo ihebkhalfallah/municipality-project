@@ -33,7 +33,7 @@ export class AuthService {
       throw new UnauthorizedException('Your account is locked.');
     }
     if (!user) throw new UnauthorizedException('Invalid credentials');
-    
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
@@ -46,7 +46,7 @@ export class AuthService {
       expiresIn: this.configService.get<string>('JWT_EXPIRATION'),
     });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
-    
+
     return {
       accessToken,
       refreshToken,
@@ -77,13 +77,16 @@ export class AuthService {
       'reset-password-template.html',
     );
 
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const resetPasswordUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
     await this.mailerService.sendMail({
       to: email,
       subject: 'Password Reset Request',
       templatePath: templatePath,
       context: {
         name: user.firstName,
-        resetToken: resetToken,
+        resetPasswordUrl: resetPasswordUrl,
       },
     });
 
@@ -109,8 +112,21 @@ export class AuthService {
     }
   }
 
-
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.userRepository.findOne({
+      where: { phoneNumber: createUserDto.phoneNumber },
+    });
+    if (existingUser) {
+      throw new BadRequestException('Phone number already in use');
+    }
+
+    const existingEmailUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+    if (existingEmailUser) {
+      throw new BadRequestException('Email already in use');
+    }
+
     const user = this.userRepository.create(createUserDto);
     const hashedPassword = await bcrypt.hash(user.password, 10);
     user.password = hashedPassword;

@@ -21,6 +21,7 @@ import { Demande } from './demande/demande.entity';
 import { Document } from './documents/documents.entity';
 import { Comment } from './comment/comment.entity';
 import { Event } from './event/event.entity';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { Event } from './event/event.entity';
     AuthorizationModule,
     CommentModule,
     DocumentModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailerService, UserRoleSeed],
