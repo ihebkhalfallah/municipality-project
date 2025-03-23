@@ -21,11 +21,11 @@ import * as JSZip from 'jszip';
 import { RolesGuard } from 'src/auth/role.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('documents')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('upload/:entityType/:entityId')
   @UseInterceptors(FilesInterceptor('files'))
   async uploadFiles(
@@ -62,6 +62,7 @@ export class DocumentController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   async getAllDocuments() {
     try {
@@ -216,6 +217,7 @@ export class DocumentController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('download/:entityType/:entityId')
   async downloadDocumentsByEntity(
     @Param('entityType') entityType: string,
@@ -261,6 +263,7 @@ export class DocumentController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':documentId')
   async deleteDocument(@Param('documentId', ParseIntPipe) documentId: number) {
     try {

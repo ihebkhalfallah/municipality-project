@@ -3,6 +3,7 @@ import { Demande } from 'src/demande/demande.entity';
 import { Document } from 'src/documents/documents.entity';
 import { Event } from 'src/event/event.entity';
 import { User } from 'src/users/user.entity';
+import { MaxTotalFileSize } from '../common/decorators/total-file-size.decorator';
 import {
   Column,
   CreateDateColumn,
@@ -18,7 +19,7 @@ export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', charset: 'utf8', collation: 'utf8_general_ci'})
+  @Column({ type: 'varchar', charset: 'utf8', collation: 'utf8_general_ci' })
   commentText: string;
 
   @CreateDateColumn()
@@ -55,5 +56,8 @@ export class Comment {
   authorizationId: number;
 
   @OneToMany(() => Document, (document) => document.comment)
+  @MaxTotalFileSize(10, {
+    message: 'Total size of all files in a comment cannot exceed 10MB',
+  })
   documents: Document[];
 }

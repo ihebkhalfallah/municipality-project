@@ -16,6 +16,8 @@ import { Document } from './documents.entity';
 
 @Injectable()
 export class DocumentService {
+  private readonly maxTotalFileSize: number;
+
   constructor(
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
@@ -27,7 +29,11 @@ export class DocumentService {
     private authorizationRepository: Repository<Authorization>,
     @InjectRepository(Comment)
     private commentRepository: Repository<Comment>,
-  ) {}
+  ) {
+    const maxFileSizeEnv = process.env.MAX_TOTAL_FILE_SIZE_MB;
+    this.maxTotalFileSize =
+      (maxFileSizeEnv ? parseInt(maxFileSizeEnv, 10) : 10) * 1024 * 1024;
+  }
 
   // Helper function to save the file to the server
   private saveFile(file: Express.Multer.File): {
@@ -52,6 +58,21 @@ export class DocumentService {
     };
   }
 
+  async checkTotalFileSize(
+    entityType: string,
+    entityId: number,
+    newFileSize: number,
+  ): Promise<void> {
+    const documents = await this.getDocumentsByEntity(entityType, entityId);
+    const totalSize =
+      documents.reduce((sum, doc) => sum + (doc.fileSize || 0), 0) +
+      newFileSize;
+
+    if (totalSize > this.maxTotalFileSize) {
+      throw new BadRequestException('Total file size cannot exceed 10MB');
+    }
+  }
+
   async uploadDocuments(
     files: Express.Multer.File[],
     entityType: string,
@@ -66,6 +87,8 @@ export class DocumentService {
     const documents: Document[] = [];
 
     for (const file of files) {
+      await this.checkTotalFileSize(entityType, entityId, file.size);
+
       const { filePath, fileName } = this.saveFile(file);
 
       let entity: Event | Demande | Authorization | Comment | null = null;

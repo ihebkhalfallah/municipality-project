@@ -22,11 +22,11 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { FindEventDto } from './dto/filter-event.dto';
 import { AuthenticatedRequest } from 'src/types/user-payload.interface';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('events')
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     USER_ROLE.ORGANIZATION,
     USER_ROLE.PERMISSION_ADMIN,
@@ -42,6 +42,7 @@ export class EventController {
     return this.eventService.createEvent(userId, createEventDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(
     USER_ROLE.ORGANIZATION,
     USER_ROLE.PERMISSION_ADMIN,
@@ -56,6 +57,7 @@ export class EventController {
     return this.eventService.updateEvent(eventId, updateEventDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(USER_ROLE.SUPER_ADMIN, USER_ROLE.ORGANIZATION)
   @Delete(':eventId')
   remove(@Param('eventId') eventId: number) {

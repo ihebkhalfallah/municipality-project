@@ -10,6 +10,7 @@ import { EVENT_TYPE, EVENT_STATUS } from './event.enum';
 import { User } from 'src/users/user.entity';
 import { Comment } from 'src/comment/comment.entity';
 import { Document } from 'src/documents/documents.entity';
+import { MaxTotalFileSize } from '../common/decorators/total-file-size.decorator';
 
 @Entity()
 export class Event {
@@ -43,6 +44,9 @@ export class Event {
   status: EVENT_STATUS;
 
   @OneToMany(() => Document, (document) => document.event)
+  @MaxTotalFileSize(10, {
+    message: 'Total size of all files in an event cannot exceed 10MB',
+  })
   documents: Document[];
 
   @ManyToOne(() => User, (user) => user.events)

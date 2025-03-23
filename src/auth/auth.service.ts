@@ -56,6 +56,9 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        profileimage: user.profile_photo,
+        nationalId: user.cin,
+        idAssociation: user.idAssociation,
       },
     };
   }
@@ -134,5 +137,41 @@ export class AuthService {
 
     const createdUser = await this.userRepository.save(user);
     return documentMapping(createdUser, User);
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      const decoded = this.jwtService.verify(refreshToken);
+
+      const user = await this.userService.findOne(decoded.sub);
+      if (!user) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const payload = { email: user.email, sub: user.id, role: user.role };
+      const accessToken = this.jwtService.sign(payload, {
+        expiresIn: this.configService.get<string>('JWT_EXPIRATION'),
+      });
+      const newRefreshToken = this.jwtService.sign(payload, {
+        expiresIn: '7d',
+      });
+
+      return {
+        accessToken,
+        refreshToken: newRefreshToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          profileimage: user.profile_photo,
+          nationalId: user.cin,
+          idAssociation: user.idAssociation,
+        },
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
   }
 }

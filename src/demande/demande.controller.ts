@@ -20,7 +20,6 @@ import { CreateDemandeDto } from './dto/create-demande.dto';
 import { Demande } from './demande.entity';
 import { FindDemandeDto } from './dto/filter-demande.dto';
 import { UpdateDemandeDto } from './dto/update-demande.dto';
-import { Request } from 'express';
 import { AuthenticatedRequest } from 'src/types/user-payload.interface';
 import { Roles } from 'src/auth/role.decorator';
 import { USER_ROLE } from 'src/users/role.enum';
@@ -35,6 +34,7 @@ export class DemandeController {
     USER_ROLE.CITIZEN,
     USER_ROLE.CONTESTATION_ADMIN,
     USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.BUSINESS,
   )
   @Post()
   async createDemande(
@@ -54,6 +54,7 @@ export class DemandeController {
     USER_ROLE.CITIZEN,
     USER_ROLE.CONTESTATION_ADMIN,
     USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.BUSINESS,
   )
   @Get()
   async findAll(@Query() findDemandeDto: FindDemandeDto): Promise<{
@@ -70,6 +71,7 @@ export class DemandeController {
     USER_ROLE.CITIZEN,
     USER_ROLE.CONTESTATION_ADMIN,
     USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.BUSINESS,
   )
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Demande> {
@@ -85,6 +87,7 @@ export class DemandeController {
     USER_ROLE.CITIZEN,
     USER_ROLE.CONTESTATION_ADMIN,
     USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.BUSINESS,
   )
   @Patch(':id')
   async updateDemande(

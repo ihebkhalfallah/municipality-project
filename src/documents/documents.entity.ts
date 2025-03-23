@@ -9,6 +9,7 @@ import { Event } from '../event/event.entity';
 import { Demande } from '../demande/demande.entity';
 import { Authorization } from '../authorization/authorization.entity';
 import { Comment } from '../comment/comment.entity';
+import { Max } from 'class-validator';
 
 @Entity()
 export class Document {
@@ -22,6 +23,7 @@ export class Document {
   originalFileName: string;
 
   @Column({ nullable: true })
+  @Max(10 * 1024 * 1024, { message: 'File size cannot exceed 10MB' })
   fileSize: number;
 
   @Column({ nullable: true })
