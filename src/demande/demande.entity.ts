@@ -17,13 +17,13 @@ export class Demande {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ nullable: false })
   name: string;
 
-  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ nullable: false })
   description: string;
 
-  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ nullable: false })
   location: string;
 
   @Column({ nullable: false })
