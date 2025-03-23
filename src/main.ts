@@ -11,6 +11,7 @@ import * as morgan from 'morgan';
 import { UserRoleSeed } from './seeds/user-role.seed';
 
 async function bootstrap() {
+  console.log(process.env.CORS_ORIGIN);
   await createDatabaseIfNotExists();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
