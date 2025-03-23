@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  app:
+      build: ../
+      container_name: municipality-backend
+      ports:
+        - "3000:3000"
+      environment:
+        DB_HOST: ${DB_HOST}
+        DB_PORT: ${DB_PORT}
+        DB_USERNAME: ${DB_USERNAME}
+        DB_PASSWORD: ${DB_PASSWORD}
+        DB_DATABASE: ${DB_DATABASE}
+      depends_on:
+        - db
   mysql:
     image: mysql:5.7
     ports:
