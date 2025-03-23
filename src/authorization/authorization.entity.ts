@@ -17,10 +17,10 @@ export class Authorization {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: false, charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ nullable: false })
   name: string;
 
-  @Column({ type: 'varchar', charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ type: 'varchar' })
   description: string;
 
   @Column({ nullable: false })

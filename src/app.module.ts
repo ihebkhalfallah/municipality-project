@@ -29,14 +29,20 @@ import { StatsModule } from './stats/stats.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
+        type: 'postgres', // Ensure this is set to 'postgres'
         host: configService.get<string>('DB_HOST'),
         port: configService.get<number>('DB_PORT'),
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [User, Event, Comment, Document, Demande, Authorization],
-        synchronize: true,
+        synchronize: true, // Be careful with this in production
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
       }),
       inject: [ConfigService],
     }),

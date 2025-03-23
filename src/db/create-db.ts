@@ -1,26 +1,34 @@
-import { createConnection } from 'mysql2/promise';
-import { RowDataPacket } from 'mysql2';
+import { Client } from 'pg';
 
 async function createDatabaseIfNotExists() {
-  const connection = await createConnection({
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT ?? '3306', 10),
-    user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-  });
+  const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE, DB_SSL } =
+    process.env;
 
-  const databaseName = process.env.DB_DATABASE;
-
-  if (!databaseName) {
-    throw new Error('Database name is not defined in environment variables.');
+  if (!DB_HOST || !DB_PORT || !DB_USERNAME || !DB_PASSWORD || !DB_DATABASE) {
+    throw new Error(
+      'One or more required environment variables are not defined.',
+    );
   }
 
+  const client = new Client({
+    host: DB_HOST,
+    port: parseInt(DB_PORT, 10),
+    user: DB_USERNAME,
+    password: DB_PASSWORD,
+    database: 'postgres',
+    ssl: DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  });
+
+  const databaseName = DB_DATABASE;
+
   try {
-    const [rows] = await connection.execute<RowDataPacket[]>(
-      `SHOW DATABASES LIKE '${databaseName}'`,
+    await client.connect();
+    const res = await client.query(
+      `SELECT 1 FROM pg_database WHERE datname = $1`,
+      [databaseName],
     );
-    if (rows.length === 0) {
-      await connection.execute(`CREATE DATABASE ${databaseName}`);
+    if (res.rowCount === 0) {
+      await client.query(`CREATE DATABASE ${databaseName}`);
       console.log(`Database '${databaseName}' created successfully.`);
     } else {
       console.log(`Database '${databaseName}' already exists.`);
@@ -28,7 +36,7 @@ async function createDatabaseIfNotExists() {
   } catch (error) {
     console.error('Error creating database:', error);
   } finally {
-    await connection.end();
+    await client.end();
   }
 }
 
