@@ -19,7 +19,7 @@ export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', charset: 'utf8', collation: 'utf8_general_ci' })
+  @Column({ type: 'varchar' })
   commentText: string;
 
   @CreateDateColumn()

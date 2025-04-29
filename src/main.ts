@@ -11,6 +11,9 @@ import * as morgan from 'morgan';
 import { UserRoleSeed } from './seeds/user-role.seed';
 
 async function bootstrap() {
+  console.log(process.env.CORS_ORIGIN);
+  console.log(`VAR1: ${process.env.VAR1}`);
+  console.log(`VAR2: ${process.env.VAR2}`);
   await createDatabaseIfNotExists();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
@@ -26,8 +29,12 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new TransformInterceptor());
 
+  const corsOrigins = [process.env.VAR1, process.env.VAR2].filter(
+    Boolean,
+  ) as string[];
+
   app.enableCors({
-    origin: process.env.CORS_ORIGIN ?? 'http://localhost:3002',
+    origin: corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

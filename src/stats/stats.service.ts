@@ -44,7 +44,7 @@ export class StatsService {
   ): Promise<{ month: string; count: number }[]> {
     return this.demandeRepository
       .createQueryBuilder('demande')
-      .select("DATE_FORMAT(demande.date, '%Y-%m')", 'month')
+      .select("TO_CHAR(demande.date, 'YYYY-MM')", 'month')
       .addSelect('COUNT(demande.id)', 'count')
       .where('demande.status = :status', { status })
       .andWhere('demande.type = :type', { type })
@@ -66,7 +66,7 @@ export class StatsService {
   ): Promise<{ month: string; count: number }[]> {
     return this.eventRepository
       .createQueryBuilder('event')
-      .select("DATE_FORMAT(event.date, '%Y-%m')", 'month')
+      .select("TO_CHAR(event.date, 'YYYY-MM')", 'month')
       .addSelect('COUNT(event.id)', 'count')
       .where('event.status = :status', { status })
       .andWhere('event.type = :type', { type })
@@ -86,7 +86,7 @@ export class StatsService {
   ): Promise<{ month: string; count: number }[]> {
     return this.authorizationRepository
       .createQueryBuilder('authorization')
-      .select("DATE_FORMAT(authorization.creation_date, '%Y-%m')", 'month')
+      .select("TO_CHAR(authorization.creation_date, 'YYYY-MM')", 'month')
       .addSelect('COUNT(authorization.id)', 'count')
       .where('authorization.status = :status', { status })
       .groupBy('month')
